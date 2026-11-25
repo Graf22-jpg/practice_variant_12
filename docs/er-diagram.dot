@@ -1,0 +1,65 @@
+digraph ER {
+  graph [fontname="Arial", fontsize=14, rankdir=LR, nodesep=0.8, ranksep=1.0, splines=spline, pad=0.4,
+         label="ER-діаграма бази даних SQLite (варіант 12)", labelloc=t];
+  node  [shape=plaintext, fontname="Arial", fontsize=11];
+  edge  [fontname="Arial", fontsize=10, color="#333333"];
+
+  clients [label=<
+    <table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#dbe8ff" colspan="2"><b>clients</b></td></tr>
+      <tr><td align="left"><b>PK</b> client_id</td><td port="client_id" align="left">INTEGER</td></tr>
+      <tr><td align="left">full_name</td><td align="left">TEXT NOT NULL</td></tr>
+      <tr><td align="left">phone</td><td align="left">TEXT NOT NULL UNIQUE</td></tr>
+      <tr><td align="left">registered_at</td><td align="left">TEXT NOT NULL</td></tr>
+    </table>>];
+
+  services [label=<
+    <table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#dbe8ff" colspan="2"><b>services</b></td></tr>
+      <tr><td align="left"><b>PK</b> service_id</td><td port="service_id" align="left">INTEGER</td></tr>
+      <tr><td align="left">name</td><td align="left">TEXT NOT NULL UNIQUE</td></tr>
+      <tr><td align="left">base_price</td><td align="left">NUMERIC NOT NULL CHECK (&gt; 0)</td></tr>
+      <tr><td align="left">duration_days</td><td align="left">INTEGER NOT NULL CHECK (1..30)</td></tr>
+      <tr><td align="left">is_active</td><td align="left">INTEGER NOT NULL DEFAULT 1</td></tr>
+    </table>>];
+
+  orders [label=<
+    <table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#dbe8ff" colspan="2"><b>orders</b></td></tr>
+      <tr><td align="left"><b>PK</b> order_id</td><td port="order_id" align="left">INTEGER (номер квитанції)</td></tr>
+      <tr><td port="client_fk" align="left"><b>FK</b> client_id</td><td align="left">INTEGER NOT NULL → clients</td></tr>
+      <tr><td align="left">accepted_at</td><td align="left">TEXT NOT NULL</td></tr>
+      <tr><td align="left">ready_date</td><td align="left">TEXT NOT NULL</td></tr>
+      <tr><td align="left">is_urgent</td><td align="left">INTEGER NOT NULL DEFAULT 0</td></tr>
+      <tr><td align="left">status</td><td align="left">TEXT NOT NULL CHECK (ACCEPTED, IN_PROGRESS, READY, ISSUED, CANCELLED)</td></tr>
+      <tr><td align="left">discount</td><td align="left">NUMERIC NOT NULL DEFAULT 0</td></tr>
+      <tr><td align="left">total_price</td><td align="left">NUMERIC NOT NULL</td></tr>
+      <tr><td align="left">issued_at</td><td align="left">TEXT NULL</td></tr>
+    </table>>];
+
+  order_items [label=<
+    <table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#dbe8ff" colspan="2"><b>order_items</b></td></tr>
+      <tr><td align="left"><b>PK</b> item_id</td><td port="item_id" align="left">INTEGER</td></tr>
+      <tr><td port="order_fk" align="left"><b>FK</b> order_id</td><td align="left">INTEGER NOT NULL → orders</td></tr>
+      <tr><td align="left">item_type</td><td align="left">TEXT NOT NULL</td></tr>
+      <tr><td align="left">material</td><td align="left">TEXT NOT NULL CHECK (NORMAL, DELICATE, LEATHER_FUR)</td></tr>
+      <tr><td align="left">color</td><td align="left">TEXT NOT NULL</td></tr>
+      <tr><td align="left">defects</td><td align="left">TEXT NULL</td></tr>
+      <tr><td align="left">price</td><td align="left">NUMERIC NOT NULL</td></tr>
+    </table>>];
+
+  order_item_services [label=<
+    <table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#fff2cc" colspan="2"><b>order_item_services</b></td></tr>
+      <tr><td port="oi_fk" align="left"><b>PK, FK</b> item_id</td><td align="left">INTEGER → order_items</td></tr>
+      <tr><td port="svc_fk" align="left"><b>PK, FK</b> service_id</td><td align="left">INTEGER → services</td></tr>
+      <tr><td align="left">price_snapshot</td><td align="left">NUMERIC NOT NULL</td></tr>
+    </table>>];
+
+  clients:client_id:e -> orders:client_fk:w [dir=both, arrowtail=tee, arrowhead=crow, taillabel="1", headlabel="0..*", labeldistance=2.2];
+  orders:order_id:e -> order_items:order_fk:w [dir=both, arrowtail=tee, arrowhead=crow, taillabel="1", headlabel="1..20", labeldistance=2.2];
+  order_items:item_id:e -> order_item_services:oi_fk:w [dir=both, arrowtail=tee, arrowhead=crow, taillabel="1", headlabel="1..*", labeldistance=2.2];
+  services:service_id:e -> order_item_services:svc_fk:w [dir=both, arrowtail=tee, arrowhead=crow, taillabel="1", headlabel="0..*", labeldistance=2.2];
+  { rank=same; order_items; services; }
+}

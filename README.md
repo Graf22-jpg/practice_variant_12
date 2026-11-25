@@ -91,3 +91,5 @@ practice_variant_12/
 
 - [Аналіз предметної області](docs/domain-analysis.md)
 - [Функціональні вимоги, User Stories, бізнес-правила](docs/requirements.md)
+- [Структура даних (класи, таблиці, ключі)](docs/data-model.md) та [діаграми класів і ER](docs/class-diagram.png)
+- [UML Use Case Diagram](docs/use-case.png) та [сценарії використання](docs/scenarios.md)
